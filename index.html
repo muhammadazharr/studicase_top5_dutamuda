@@ -12,6 +12,11 @@
         body {
             font-family: 'DM Sans', sans-serif;
             background-color: #1634a7;
+            /* Mencegah seleksi teks yang tidak diinginkan */
+            user-select: none;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
         }
         .perspective-container {
             perspective: 1000px;
@@ -75,7 +80,6 @@
             color: #ef4444 !important; /* Merah */
             animation: pulse-timer 1s infinite;
         }
-        /* REVISI: Mengubah animasi agar tidak mengubah ukuran, hanya opasitas */
         @keyframes pulse-timer {
             50% { opacity: 0.6; }
         }
@@ -83,30 +87,22 @@
 </head>
 <body class="text-white min-h-screen flex flex-col items-center justify-center p-4 sm:p-6 lg:p-8 pt-4">
 
-    <!-- Header Aplikasi -->
     <header class="text-center mb-8">
-    
         <h1 class="text-4xl md:text-5xl font-black tracking-tight uppercase">Studi Kasus TOP 5 Duta Muda</h1>
         <p class="text-xl md:text-2xl text-gray-300 mt-2">CBP Rupiah Championship 2025</p>
     </header>
 
-    <!-- Grid untuk Kotak Studi Kasus -->
     <main id="question-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4 md:gap-6 w-full max-w-6xl mx-auto">
         <!-- Kotak pertanyaan akan dibuat oleh JavaScript -->
     </main>
 
-    <!-- Tombol Kontrol untuk Operator -->
-    <footer class="mt-8">
-        <button id="reset-button" class="bg-red-600 hover:bg-red-700 text-white font-bold py-3 px-6 rounded-lg shadow-lg transition-transform transform hover:scale-105">
-            Reset Sesi
-        </button>
+    <!-- Tombol Reset Sesi disembunyikan -->
+    <footer class="hidden">
     </footer>
 
-    <!-- Modal untuk menampilkan pertanyaan penuh dengan Timer -->
     <div id="question-modal" class="modal fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center p-4 opacity-0 pointer-events-none z-50">
         <div class="bg-white text-gray-800 rounded-2xl shadow-2xl w-full max-w-5xl p-8 md:p-12 relative transform scale-95 transition-transform flex flex-col md:flex-row gap-8">
             
-            <!-- Sisi Kiri: Konten Pertanyaan -->
             <div class="w-full flex flex-col gap-4">
                 <div>
                     <h2 class="text-2xl md:text-3xl font-bold mb-4" style="color: #1634a7;">Studi Kasus:</h2>
@@ -117,15 +113,13 @@
                 </div>
             </div>
 
-            <!-- Sisi Kanan: Timer -->
-            <!-- BUG FIX: Memberikan lebar tetap (fixed width) pada kotak timer untuk layout yang stabil -->
             <div class="w-full md:w-96 flex-shrink-0 flex flex-col items-center justify-center bg-gray-100 rounded-lg p-6">
                 <h3 class="text-xl font-bold text-gray-500 uppercase tracking-wider mb-2">Waktu Menjawab</h3>
                 <div id="timer-display" class="my-4" style="color: #1634a7;">01:00</div>
-                <div class="flex space-x-2">
-                    <button id="start-timer-button" class="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded-lg">Mulai</button>
-                    <button id="stop-timer-button" class="bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-2 px-4 rounded-lg">Berhenti</button>
-                    <button id="reset-timer-button" class="bg-gray-500 hover:bg-gray-600 text-white font-bold py-2 px-4 rounded-lg">Reset</button>
+                <div class="hidden">
+                    <button id="start-timer-button">Mulai</button>
+                    <button id="stop-timer-button">Berhenti</button>
+                    <button id="reset-timer-button">Reset</button>
                 </div>
             </div>
 
@@ -134,78 +128,47 @@
     </div>
 
     <script>
-        // --- PENGATURAN SOAL STUDI KASUS ---
+        // --- PENGATURAN SOAL STUDI KASUS UNTUK DUTA MUDA ---
         const questions = [
-            { 
-                id: 1, 
-                question: "Apa yang akan anda lakukan jika mendapati teman-teman anda menggunakan dompet lipat kecil dan phone case sebagai tempat menyimpan uang rupiah?",
-                imageUrl: null 
-            },
-            { 
-                id: 2, 
-                question: "Bagaimana anda menyikapi bila menerima uang kembalian yang ternyata adalah uang palsu saat melakukan transaksi pembelian barang dari pedagang di pasar?",
-                imageUrl: null
-            },
-            { 
-                id: 3, 
-                question: "Toko yang anda kelola sedang ramai pelanggan, ketika pelanggan datang untuk membayar pesanan, anda menemukan uang yang diberikan seperti pada ilustrasi berikut. Apa tindakan yang akan anda lakukan kepada para pelanggan tersebut?",
-                imageUrl: "image1.png"
-            },
-            { 
-                id: 4, 
-                question: "Banyak beredar di media sosial konten-konten tentang tutorial melipat dan membentuk uang rupiah menjadi aneka hiasan untuk dekorasi acara atau mahar pernikahan. Apa yang akan anda lakukan ketika melihat tren tersebut viral di lingkungan anda?",
-                imageUrl: null
-            },
-            { 
-                id: 5, 
-                question: "Bagaimana anda menyikapi fenomena panic buying di masyarakat ketika menjelang hari perayaan besar, di mana masyarakat cenderung membeli dan menimbun bahan-bahan pokok?",
-                imageUrl: null
-            }
+            { id: 1, question: "Apa yang akan anda lakukan jika mendapati teman-teman anda menggunakan dompet lipat kecil dan phone case sebagai tempat menyimpan uang rupiah?", imageUrl: null },
+            { id: 2, question: "Bagaimana anda menyikapi bila menerima uang kembalian yang ternyata adalah uang palsu saat melakukan transaksi pembelian barang dari pedagang di pasar?", imageUrl: null },
+            { id: 3, question: "Toko yang anda kelola sedang ramai pelanggan, ketika pelanggan datang untuk membayar pesanan, anda menemukan uang yang diberikan seperti pada ilustrasi berikut. Apa tindakan yang akan anda lakukan kepada para pelanggan tersebut?", imageUrl: "image1.png" },
+            { id: 4, question: "Banyak beredar di media sosial konten-konten tentang tutorial melipat dan membentuk uang rupiah menjadi aneka hiasan untuk dekorasi acara atau mahar pernikahan. Apa yang akan anda lakukan ketika melihat tren tersebut viral di lingkungan anda?", imageUrl: null },
+            { id: 5, question: "Bagaimana anda menyikapi fenomena panic buying di masyarakat ketika menjelang hari perayaan besar, di mana masyarakat cenderung membeli dan menimbun bahan-bahan pokok?", imageUrl: null }
         ];
 
         // --- ELEMEN DOM ---
         const grid = document.getElementById('question-grid');
-        const resetButton = document.getElementById('reset-button');
         const modal = document.getElementById('question-modal');
         const modalQuestionText = document.getElementById('modal-question-text');
         const modalImageContainer = document.getElementById('modal-image-container');
         const modalImage = document.getElementById('modal-image');
         const closeModalButton = document.getElementById('close-modal-button');
-        
-        // --- ELEMEN TIMER ---
         const timerDisplay = document.getElementById('timer-display');
-        const startTimerBtn = document.getElementById('start-timer-button');
-        const stopTimerBtn = document.getElementById('stop-timer-button');
-        const resetTimerBtn = document.getElementById('reset-timer-button');
 
         // --- LOGIKA TIMER & SUARA ---
         const TIME_LIMIT = 60;
         const WARNING_TIME = 10;
         let timeLeft = TIME_LIMIT;
         let timerInterval = null;
+        let isTimerRunning = false;
         let audioContext;
 
         function initAudio() {
-            if (!audioContext) {
-                audioContext = new (window.AudioContext || window.webkitAudioContext)();
-            }
+            if (!audioContext) audioContext = new (window.AudioContext || window.webkitAudioContext)();
         }
 
         function playBeep(isFinalBeep = false) {
             if (!audioContext) return;
             const oscillator = audioContext.createOscillator();
             const gainNode = audioContext.createGain();
-            const duration = isFinalBeep ? 0.5 : 0.1; // REVISI: Durasi beep akhir lebih panjang
-
+            const duration = isFinalBeep ? 0.5 : 0.1;
             oscillator.connect(gainNode);
             gainNode.connect(audioContext.destination);
-
             oscillator.type = 'sine';
-            oscillator.frequency.setValueAtTime(isFinalBeep ? 880 : 900, audioContext.currentTime); // Nada sedikit beda untuk beep akhir
-            
+            oscillator.frequency.setValueAtTime(isFinalBeep ? 880 : 900, audioContext.currentTime);
             gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
             gainNode.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + duration);
-            
             oscillator.start(audioContext.currentTime);
             oscillator.stop(audioContext.currentTime + duration);
         }
@@ -222,58 +185,46 @@
         }
 
         function startTimer() {
-            if (timerInterval) return;
+            if (isTimerRunning) return;
             initAudio();
+            isTimerRunning = true;
             timerDisplay.classList.add('timer-running');
             timerInterval = setInterval(() => {
                 timeLeft--;
                 updateTimerDisplay();
-                if (timeLeft <= WARNING_TIME && timeLeft > 0) {
-                    playBeep();
-                }
+                if (timeLeft <= WARNING_TIME && timeLeft > 0) playBeep();
                 if (timeLeft <= 0) {
-                    stopTimer();
-                    playBeep(true); // Memainkan beep akhir yang lebih panjang
+                    stopTimer(true);
+                    playBeep(true);
                 }
             }, 1000);
         }
 
-        function stopTimer() {
+        function stopTimer(isFinished = false) {
             clearInterval(timerInterval);
             timerInterval = null;
+            if (!isFinished) isTimerRunning = false;
             timerDisplay.classList.remove('timer-running');
         }
 
         function resetTimer() {
             stopTimer();
+            isTimerRunning = false;
             timeLeft = TIME_LIMIT;
             updateTimerDisplay();
         }
 
+        // --- LOGIKA APLIKASI UTAMA ---
         function createQuestionBoxes() {
             grid.innerHTML = '';
-            // REVISI: Menghilangkan pengacakan soal.
             questions.forEach((q) => {
-                const boxNumber = q.id; // Menggunakan ID soal sebagai nomor kotak
+                const boxNumber = q.id;
                 const box = document.createElement('div');
                 box.className = 'question-box perspective-container aspect-square';
+                box.dataset.id = boxNumber;
                 box.dataset.question = q.question;
-                if (q.imageUrl) {
-                    box.dataset.imageUrl = q.imageUrl;
-                }
-
-                box.innerHTML = `
-                    <div class="question-box-inner">
-                        <div class="question-box-front">
-                            <span class="text-3xl font-bold uppercase tracking-wider">Studi Kasus</span>
-                            <span class="text-6xl md:text-8xl font-black">${boxNumber}</span>
-                        </div>
-                        <div class="question-box-back">
-                            <h3 class="font-bold text-lg md:text-xl">Kasus No. ${boxNumber}</h3>
-                            <p class="text-sm md:text-base mt-2">${q.question.substring(0, 50)}...</p>
-                        </div>
-                    </div>
-                `;
+                if (q.imageUrl) box.dataset.imageUrl = q.imageUrl;
+                box.innerHTML = `<div class="question-box-inner"><div class="question-box-front"><span class="text-3xl font-bold uppercase tracking-wider">Studi Kasus</span><span class="text-6xl md:text-8xl font-black">${boxNumber}</span></div><div class="question-box-back"><h3 class="font-bold text-lg md:text-xl">Kasus No. ${boxNumber}</h3><p class="text-sm md:text-base mt-2">${q.question.substring(0, 50)}...</p></div></div>`;
                 box.addEventListener('click', () => handleBoxClick(box), { once: true });
                 grid.appendChild(box);
             });
@@ -290,18 +241,13 @@
         function showModal(question, imageUrl) {
             resetTimer();
             modalQuestionText.textContent = question;
-
             if (imageUrl) {
                 modalImage.src = imageUrl;
-                modalImage.onerror = function() {
-                    this.onerror=null;
-                    this.src='https://placehold.co/600x300/e2e8f0/475569?text=Gambar+Gagal+Dimuat';
-                };
+                modalImage.onerror = function() { this.onerror=null; this.src='https://placehold.co/600x300/e2e8f0/475569?text=Gambar+Gagal+Dimuat'; };
                 modalImageContainer.classList.remove('hidden');
             } else {
                 modalImageContainer.classList.add('hidden');
             }
-
             modal.classList.remove('opacity-0', 'pointer-events-none');
             modal.querySelector('div').classList.remove('scale-95');
         }
@@ -311,18 +257,47 @@
             modal.classList.add('opacity-0', 'pointer-events-none');
             modal.querySelector('div').classList.add('scale-95');
         }
-
+        
         // --- EVENT LISTENERS ---
         document.addEventListener('DOMContentLoaded', createQuestionBoxes);
-        resetButton.addEventListener('click', () => {
-             if (confirm('Apakah Anda yakin ingin mereset sesi?')) {
-                createQuestionBoxes();
+        closeModalButton.addEventListener('click', hideModal);
+
+        // Kontrol keyboard terpusat
+        document.addEventListener('keydown', (event) => {
+            // Shortcut global (berlaku kapan saja)
+            if (event.ctrlKey && event.shiftKey && event.code === 'KeyR') {
+                event.preventDefault();
+                if (confirm('Apakah Anda yakin ingin mereset seluruh sesi?')) {
+                    if (!modal.classList.contains('opacity-0')) {
+                        hideModal();
+                    }
+                    createQuestionBoxes();
+                }
+            }
+
+            // Shortcut di layar utama (modal tertutup)
+            if (modal.classList.contains('opacity-0')) {
+                const keyNumber = parseInt(event.key);
+                if (!isNaN(keyNumber) && keyNumber >= 1 && keyNumber <= 5) {
+                    const boxToClick = document.querySelector(`.question-box[data-id='${keyNumber}']`);
+                    if (boxToClick && !boxToClick.classList.contains('disabled')) {
+                        boxToClick.click();
+                    }
+                }
+            } else { // Shortcut saat modal terbuka
+                if (event.ctrlKey && event.code === 'Space') {
+                    event.preventDefault();
+                    if (isTimerRunning) { stopTimer(); } else { if (timeLeft > 0) startTimer(); }
+                }
+                if (event.ctrlKey && !event.shiftKey && event.code === 'KeyR') {
+                    event.preventDefault();
+                    resetTimer();
+                }
+                if (event.code === 'Escape') {
+                    hideModal();
+                }
             }
         });
-        closeModalButton.addEventListener('click', hideModal);
-        startTimerBtn.addEventListener('click', startTimer);
-        stopTimerBtn.addEventListener('click', stopTimer);
-        resetTimerBtn.addEventListener('click', resetTimer);
     </script>
 </body>
 </html>
