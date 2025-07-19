@@ -12,11 +12,6 @@
         body {
             font-family: 'DM Sans', sans-serif;
             background-color: #1634a7;
-            /* Mencegah seleksi teks yang tidak diinginkan */
-            user-select: none;
-            -webkit-user-select: none;
-            -moz-user-select: none;
-            -ms-user-select: none;
         }
         .perspective-container {
             perspective: 1000px;
@@ -96,8 +91,10 @@
         <!-- Kotak pertanyaan akan dibuat oleh JavaScript -->
     </main>
 
-    <!-- Tombol Reset Sesi disembunyikan -->
-    <footer class="hidden">
+    <footer class="mt-8">
+        <button id="reset-button" class="bg-red-600 hover:bg-red-700 text-white font-bold py-3 px-6 rounded-lg shadow-lg transition-transform transform hover:scale-105">
+            Reset Sesi
+        </button>
     </footer>
 
     <div id="question-modal" class="modal fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center p-4 opacity-0 pointer-events-none z-50">
@@ -116,10 +113,10 @@
             <div class="w-full md:w-96 flex-shrink-0 flex flex-col items-center justify-center bg-gray-100 rounded-lg p-6">
                 <h3 class="text-xl font-bold text-gray-500 uppercase tracking-wider mb-2">Waktu Menjawab</h3>
                 <div id="timer-display" class="my-4" style="color: #1634a7;">01:00</div>
-                <div class="hidden">
-                    <button id="start-timer-button">Mulai</button>
-                    <button id="stop-timer-button">Berhenti</button>
-                    <button id="reset-timer-button">Reset</button>
+                <div class="flex space-x-2">
+                    <button id="start-timer-button" class="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded-lg">Mulai</button>
+                    <button id="stop-timer-button" class="bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-2 px-4 rounded-lg">Berhenti</button>
+                    <button id="reset-timer-button" class="bg-gray-500 hover:bg-gray-600 text-white font-bold py-2 px-4 rounded-lg">Reset</button>
                 </div>
             </div>
 
@@ -139,12 +136,16 @@
 
         // --- ELEMEN DOM ---
         const grid = document.getElementById('question-grid');
+        const resetButton = document.getElementById('reset-button');
         const modal = document.getElementById('question-modal');
         const modalQuestionText = document.getElementById('modal-question-text');
         const modalImageContainer = document.getElementById('modal-image-container');
         const modalImage = document.getElementById('modal-image');
         const closeModalButton = document.getElementById('close-modal-button');
         const timerDisplay = document.getElementById('timer-display');
+        const startTimerBtn = document.getElementById('start-timer-button');
+        const stopTimerBtn = document.getElementById('stop-timer-button');
+        const resetTimerBtn = document.getElementById('reset-timer-button');
 
         // --- LOGIKA TIMER & SUARA ---
         const TIME_LIMIT = 60;
@@ -167,7 +168,10 @@
             gainNode.connect(audioContext.destination);
             oscillator.type = 'sine';
             oscillator.frequency.setValueAtTime(isFinalBeep ? 880 : 900, audioContext.currentTime);
-            gainNode.gain.setValueAtTime(1.0 audioContext.currentTime);
+            
+            // Volume suara standar (0.3)
+            gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+            
             gainNode.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + duration);
             oscillator.start(audioContext.currentTime);
             oscillator.stop(audioContext.currentTime + duration);
@@ -260,22 +264,13 @@
         
         // --- EVENT LISTENERS ---
         document.addEventListener('DOMContentLoaded', createQuestionBoxes);
+        resetButton.addEventListener('click', () => { if (confirm('Apakah Anda yakin ingin mereset sesi?')) createQuestionBoxes(); });
         closeModalButton.addEventListener('click', hideModal);
+        startTimerBtn.addEventListener('click', startTimer);
+        stopTimerBtn.addEventListener('click', stopTimer);
+        resetTimerBtn.addEventListener('click', resetTimer);
 
-        // Kontrol keyboard terpusat
         document.addEventListener('keydown', (event) => {
-            // Shortcut global (berlaku kapan saja)
-            if (event.ctrlKey && event.shiftKey && event.code === 'KeyR') {
-                event.preventDefault();
-                if (confirm('Apakah Anda yakin ingin mereset seluruh sesi?')) {
-                    if (!modal.classList.contains('opacity-0')) {
-                        hideModal();
-                    }
-                    createQuestionBoxes();
-                }
-            }
-
-            // Shortcut di layar utama (modal tertutup)
             if (modal.classList.contains('opacity-0')) {
                 const keyNumber = parseInt(event.key);
                 if (!isNaN(keyNumber) && keyNumber >= 1 && keyNumber <= 5) {
@@ -284,15 +279,7 @@
                         boxToClick.click();
                     }
                 }
-            } else { // Shortcut saat modal terbuka
-                if (event.ctrlKey && event.code === 'Space') {
-                    event.preventDefault();
-                    if (isTimerRunning) { stopTimer(); } else { if (timeLeft > 0) startTimer(); }
-                }
-                if (event.ctrlKey && !event.shiftKey && event.code === 'KeyR') {
-                    event.preventDefault();
-                    resetTimer();
-                }
+            } else {
                 if (event.code === 'Escape') {
                     hideModal();
                 }
